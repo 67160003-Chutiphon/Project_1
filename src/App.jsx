@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import PostList from "./components/PostList";
 import UserCard from "./components/UserCard";
+import AddPostForm from "./components/AddPostForm";
 
-const POSTS = [
+const INITIAL_POSTS = [
   {
     id: 1,
     title: "React คืออะไร?",
@@ -31,10 +33,62 @@ const USERS = [
   { id: 3, name: "วิชาญ โค้ดเก่ง", email: "wichan@dev.com" },
 ];
 
+const POSTS_STORAGE_KEY = "devboard_posts";
+const FAVORITES_STORAGE_KEY = "devboard_favorites";
+
+function getSavedPosts() {
+  try {
+    const raw = localStorage.getItem(POSTS_STORAGE_KEY);
+    const parsed = JSON.parse(raw || "null");
+    return Array.isArray(parsed) ? parsed : INITIAL_POSTS;
+  } catch {
+    return INITIAL_POSTS;
+  }
+}
+
+function getSavedFavorites() {
+  try {
+    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    const parsed = JSON.parse(raw || "null");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function App() {
+  const [posts, setPosts] = useState(() => getSavedPosts());
+  const [favorites, setFavorites] = useState(() => getSavedFavorites());
+
+  useEffect(() => {
+    localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts));
+  }, [posts]);
+
+  useEffect(() => {
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+  }, [favorites]);
+
+  function handleToggleFavorite(postId) {
+    setFavorites((prev) =>
+      prev.includes(postId)
+        ? prev.filter((id) => id !== postId)
+        : [...prev, postId],
+    );
+  }
+
+  function handleAddPost({ title, body }) {
+    const newPost = {
+      id: Date.now(),
+      title,
+      body,
+    };
+
+    setPosts((prev) => [newPost, ...prev]);
+  }
+
   return (
     <div>
-      <Navbar />
+      <Navbar favoriteCount={favorites.length} />
       <div
         style={{
           maxWidth: "900px",
@@ -47,7 +101,12 @@ function App() {
       >
         {/* คอลัมน์ซ้าย: โพสต์ */}
         <div>
-          <PostList posts={POSTS} />
+          <AddPostForm onAddPost={handleAddPost} />
+          <PostList
+            posts={posts}
+            favorites={favorites}
+            onToggleFavorite={handleToggleFavorite}
+          />
         </div>
 
         {/* คอลัมน์ขวา: สมาชิก */}
