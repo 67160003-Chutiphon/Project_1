@@ -1,14 +1,22 @@
 import { useState } from "react";
 
+// รับ props onAddPost เพื่อส่งข้อมูลโพสต์ใหม่กลับไปให้ไฟล์แม่ (App.jsx)
 function AddPostForm({ onAddPost }) {
+  // สร้าง state มารองรับค่าที่กรอกในช่องหัวข้อ และช่องเนื้อหา
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
+  // ฟังก์ชันนี้ถูกเรียกเมื่อกดปุ่ม "โพสต์" หรือกด Enter ในฟอร์ม
   function handleSubmit(e) {
-    e.preventDefault();
+    e.preventDefault(); // ป้องกันไม่ให้เบราว์เซอร์รีเฟรชหน้าเว็บเวลา submit ฟอร์ม
+    
+    // ตรวจสอบว่าถ้าช่องว่างทั้งคู่ (ไม่มีตัวอักษร) ก็ให้ return ยกเลิกการแอดโพสต์
     if (!title.trim() || !body.trim()) return;
 
+    // เรียกฟังก์ชันจาก props พร้อมส่ง object ที่มี title และ body กลับไป
     onAddPost({ title, body });
+    
+    // รีเซ็ตค่าในฟอร์มให้กลับมาว่างเปล่า หลังจากโพสต์เสร็จ
     setTitle("");
     setBody("");
   }
