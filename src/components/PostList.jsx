@@ -4,7 +4,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import useFetch from "../hooks/useFetch";
 
 // แสดงรายการโพสต์ พร้อมระบบค้นหา โหลดใหม่ และแบ่งหน้า (Pagination)
-function PostList({ favorites, onToggleFavorite }) {
+function PostList() {
   const { data: posts, loading, error, refetch } = useFetch("https://jsonplaceholder.typicode.com/posts");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1); // เก็บหน้าปัจจุบัน สำหรับ Pagination
@@ -90,12 +90,7 @@ function PostList({ favorites, onToggleFavorite }) {
       )}
 
       {currentPosts.map((post) => (
-        <PostCard
-          key={post.id}
-          post={post}
-          isFavorite={favorites.includes(post.id)}
-          onToggleFavorite={() => onToggleFavorite(post.id)}
-        />
+        <PostCard key={post.id} post={post} />
       ))}
 
       {/* ส่วนควบคุมการแบ่งหน้า (Pagination - Challenge 2) */}
