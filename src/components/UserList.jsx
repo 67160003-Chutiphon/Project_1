@@ -2,9 +2,12 @@ import UserCard from "./UserCard";
 import LoadingSpinner from "./LoadingSpinner";
 import useFetch from "../hooks/useFetch"; // ดึง custom hook มาใช้งาน
 
-// หน้านี้ดึงข้อมูลบัญชีผู้ใช้
+// UserList: คอมโพเนนต์ดึงข้อมูลเพื่อโชว์อาเรย์รายชื่อบัญชีผู้ใช้
+// เชื่อมต่อไปยัง: ใช้โชว์เต็มบน ProfilePage (หน้าสมาชิก) 
 function UserList() {
-  // ดึงข้อมูล users ด้วย useFetch ช่วยลด code ซ้ำซ้อน
+  
+  // users: ตัวแปรผลลัพธ์ (สวมรอย data) จาก API 
+  // loading / error: ตัวแปรสถานะจาก useFetch hook ทั่วไป
   const { data: users, loading, error } = useFetch("https://jsonplaceholder.typicode.com/users");
 
   if (loading) return <LoadingSpinner />;
@@ -24,6 +27,7 @@ function UserList() {
       >
         สมาชิก
       </h2>
+      {/* วนลูปข้อมูลใน users แล้วสร้าง UserCard ออกมาทีละใบ โดยยัดข้อมูลเข้าไปใน Props ให้การ์ดจัดการต่อ */}
       {users && users.map((user) => (
         <UserCard key={user.id} name={user.name} email={user.email} />
       ))}

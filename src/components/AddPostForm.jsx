@@ -1,22 +1,32 @@
 import { useState } from "react";
 
-// รับ props onAddPost เพื่อส่งข้อมูลโพสต์ใหม่กลับไปให้ไฟล์แม่ (App.jsx)
+// AddPostForm: คอมโพเนนต์สำหรับแสดงแบบฟอร์มเพิ่มโพสต์ใหม่
+// เชื่อมต่อไปยัง: นำไปใช้แสดงผลใน HomePage.jsx
+// ตัวแปร onAddPost (Props): เป็นฟังก์ชันที่รับมาจากแม่ (HomePage) เพื่อส่งข้อมูลโพสต์ที่กรอกเสร็จแล้วกลับไปให้แม่จัดการต่อ
 function AddPostForm({ onAddPost }) {
-  // สร้าง state มารองรับค่าที่กรอกในช่องหัวข้อ และช่องเนื้อหา
+  
+  // title: State ตัวแปรประเภท String ทำหน้าที่เก็บข้อความหน้าฟอร์มในช่อง "หัวข้อโพสต์"
+  // setTitle: ฟังก์ชันสำหรับอัปเดตค่า title ทุกครั้งที่ผู้ใช้อินพุตตัวอักษร
   const [title, setTitle] = useState("");
+
+  // body: State ตัวแปรประเภท String ทำหน้าที่เก็บข้อความหน้าฟอร์มในช่อง "เนื้อหาโพสต์" (Textarea)
+  // setBody: ฟังก์ชันสำหรับอัปเดตค่า body ทุกครั้งที่ผู้ใช้อินพุตตัวอักษร
   const [body, setBody] = useState("");
 
-  // ฟังก์ชันนี้ถูกเรียกเมื่อกดปุ่ม "โพสต์" หรือกด Enter ในฟอร์ม
+  // handleSubmit: ฟังก์ชันสำหรับจัดการเหตุการณ์เมื่อผู้ใช้กดปุ่ม "โพสต์" ในฟอร์ม หรือกด Enter
+  // เชื่อมต่อไปยัง: แอตทริบิวต์ onSubmit ของแท็ก <form> ด้านล่าง
+  // ตัวแปร e (Event Object): ออบเจ็กต์ข้อมูลเหตุการณ์ที่เกิดขึ้นจากการ submit
   function handleSubmit(e) {
-    e.preventDefault(); // ป้องกันไม่ให้เบราว์เซอร์รีเฟรชหน้าเว็บเวลา submit ฟอร์ม
+    // e.preventDefault(): สั่งยกเลิกพฤติกรรมดั้งเดิมของเบราว์เซอร์ที่จะรีเฟรชหน้าต่างใหม่เมื่อกด submit รูปแบบฟอร์ม
+    e.preventDefault(); 
     
-    // ตรวจสอบว่าถ้าช่องว่างทั้งคู่ (ไม่มีตัวอักษร) ก็ให้ return ยกเลิกการแอดโพสต์
+    // ตรวจสอบข้อมูลก่อน: ถ้านำ title หรือ body ไปตัดช่องว่าง (trim) แล้วพบว่าว่างเปล่าทั้งคู่ จะให้ยกเลิกการทำงานทันที (return)
     if (!title.trim() || !body.trim()) return;
 
-    // เรียกฟังก์ชันจาก props พร้อมส่ง object ที่มี title และ body กลับไป
+    // เรียกฟังก์ชันแม่ onAddPost ที่ถูกส่งมาทาง props พร้อมส่งโครงสร้างออบเจ็กต์ที่มี title และ body กลับไปให้ HomePage
     onAddPost({ title, body });
     
-    // รีเซ็ตค่าในฟอร์มให้กลับมาว่างเปล่า หลังจากโพสต์เสร็จ
+    // เมื่อส่งข้อมูลเสร็จแล้ว ทำการเคลียร์ช่องกรอกข้อมูลให้กลับมาเป็นค่าว่าง เพื่อความพร้อมใช้งานในรอบถัดไป
     setTitle("");
     setBody("");
   }
@@ -39,8 +49,8 @@ function AddPostForm({ onAddPost }) {
       <input
         type="text"
         placeholder="หัวข้อโพสต์"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        value={title} // ผูกค่าในช่องอินพุตกับตัวแปร state title
+        onChange={(e) => setTitle(e.target.value)} // อัปเดต state เมื่อพิมพ์
         style={{
           width: "100%",
           padding: "0.5rem",
@@ -54,8 +64,8 @@ function AddPostForm({ onAddPost }) {
 
       <textarea
         placeholder="เนื้อหาโพสต์"
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
+        value={body} // ผูกค่าในช่อง textarea กับตัวแปร state body
+        onChange={(e) => setBody(e.target.value)} // อัปเดต state เมื่อพิมพ์
         rows={3}
         style={{
           width: "100%",

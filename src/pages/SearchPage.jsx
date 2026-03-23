@@ -4,39 +4,65 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import PostCard from "../components/PostCard";
 import useFetch from "../hooks/useFetch";
 
+// SearchPage: คอมโพเนนต์ที่ให้บริการด้านการค้นหาข้อความ และแสดงผลลัพธ์ผ่าน URL Query String
+// เชื่อมต่อไปยัง: เผยแพร่ใน App.jsx ภายใต้ Route /search 
 function SearchPage() {
+  // searchParams, setSearchParams: คู่หูทำงานจาก react-router ดึงและอัปเดต Query ใน URL (?q=word)
+  // เพื่อให้ผลลัพธ์ถูกแชร์หรือบุ๊กมาร์กผ่าน URL นั้นได้จริงๆ อย่างอิสระ
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // query: ตัวแปร String ค้นหาดึงค่า "q" ออกจากหน้า URL ปัจจุบัน
+  // นำไป trim เพื่อตัดช่องว่างหัวท้ายทิ้ง หากค่าเป็น null ให้ตีเป็น string ว่างๆ ไป ("")
   const query = (searchParams.get("q") || "").trim();
+  
+  // searchInput: State ตัวแปร String เก็บข้อความที่ผู้ใช้พิมพ์ในช่อง input กรอกคำค้น 
+  // setSearchInput: ฟังก์ชันอัปเดตค่าเมื่อคีย์บอร์ดพิมพ์ลงไป 
   const [searchInput, setSearchInput] = useState(query);
+  
+  // ดึงโพสต์ทั้งหมดมารอไว้ด้วย useFetch (เสมือนฐานข้อมูลในตัวอย่างนี้)
+  // data, loading, error: ชุดข้อมูล/สถานะที่ Hook ปล่อยออกมา
   const { data, loading, error } = useFetch("https://jsonplaceholder.typicode.com/posts");
+  
+  // posts: ตัวแปรอาเรย์ใช้สำรอง (Fallback) โดยหาก data ยังเป็น null ก็ให้เป็น Array ว่าง ([]) ลดการ Error เวลาเรียก .filter()
   const posts = data || [];
 
+  // useEffect: จับตาสิ่งที่เกิดกับตัวแปร query ถอยข้อมูลที่มาจาก Query Param นอกระบบกลับไปสแตนด์บายบน SearchInput ด้วย
   useEffect(() => {
     setSearchInput(query);
   }, [query]);
 
+  // handleSearch: ตัวแปรฟังก์ชัน ทำหน้าที่ดักจับเหตุการณ์กดยืนยันปุ่มค้นหาบนฟอร์ม
+  // event: พารามิเตอร์วัตถุเหตุการณ์จากการ submit (e) 
   const handleSearch = (event) => {
-    event.preventDefault();
+    event.preventDefault(); // เบรคไม่ให้ฟอร์มโหลดหน้าตัวเองใหม่
 
+    // trimmedQuery: ตัดขอบช่องว่างกวนใจทิ้งไปก่อนเอาเข้าสู่ URL
     const trimmedQuery = searchInput.trim();
 
     if (!trimmedQuery) {
+      // ถ้าช่องค้นหาดันว่างเปล่า ไม่ต้องยัดอะไรลง URL เคลียร์ URL param ทั้งหมดให้สะอาด
       setSearchParams({});
       return;
     }
 
+    // เอาชุดข้อความนั้นแหละไปฉีดใส่พารามิเตอร์ URL ในตำแหน่ง q (เกิดเหตุการณ์ใหม่อย่างเช่น /search?q=abc)
     setSearchParams({ q: trimmedQuery });
   };
 
+  // handleClear: ตัวแปรฟังก์ชัน ทำหน้าที่เคลียร์ทิ้งทุกอย่างเมื่อกด "ล้างคำค้น"
   const handleClear = () => {
     setSearchInput("");
-    setSearchParams({});
+    setSearchParams({}); // นำพา URL ให้คลีนไร้มลทิน
   };
 
+  // filteredPosts: ตัวแปรอาเรย์ สร้างโดยการร่อนกรอง (filter) จากตัวแปร posts ใหญ่
+  // ทำงานก็ต่อเมื่อตัวแปร query บน URL มีข้อมูลพิมพ์ค้างอยู่
   const filteredPosts = query
     ? posts.filter((post) => {
+        // normalizedQuery: ปรับข้อความของ query ให้เป็นอักษรพิมพ์เล็กหมด (Case-insensitive) เพิ่อลดปัญหาการเทียบพลาด
         const normalizedQuery = query.toLowerCase();
 
+        // ตรวจว่าข้อความที่ต้องการค้นพบในชื่อโพสต์(title) หรือส่วนเนื้อหา(body) ใช่หรือไม่? 
         return (
           post.title.toLowerCase().includes(normalizedQuery) ||
           post.body.toLowerCase().includes(normalizedQuery)
@@ -59,6 +85,7 @@ function SearchPage() {
         </h2>
 
         <form
+          // แขวนฟังก์ชันรับผิดชอบ handleSearch ไว้กับเหตุการณ์ submit ของ form
           onSubmit={handleSearch}
           style={{
             display: "flex",
@@ -75,8 +102,8 @@ function SearchPage() {
           <input
             type="text"
             placeholder="พิมพ์คำที่อยากค้นหา..."
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
+            value={searchInput} // ยึดติดช่องกรอกกับ State searchInput
+            onChange={(event) => setSearchInput(event.target.value)} // ดักตัวอักษรอัปเดตขึ้น State
             autoFocus
             style={{
               flex: "1 1 320px",
@@ -105,7 +132,7 @@ function SearchPage() {
 
           <button
             type="button"
-            onClick={handleClear}
+            onClick={handleClear} // แขวนฟังก์ชันรับผิดชอบไว้เพื่อล้างทั้งหมดเมื่อคลิก
             style={{
               padding: "0.75rem 1.25rem",
               border: "1px solid #cbd5e1",
@@ -158,6 +185,7 @@ function SearchPage() {
           <p style={{ margin: 0 }}>ระบบจะค้นหาจากทั้งชื่อโพสต์และรายละเอียดโพสต์</p>
         </div>
       ) : filteredPosts.length > 0 ? (
+        // ปล่อยอาเรย์ filteredPosts เข้ามาวาดกล่องทีละการ์ด
         filteredPosts.map((post) => <PostCard key={post.id} post={post} />)
       ) : (
         <div style={{ textAlign: "center", padding: "2rem", color: "#718096" }}>

@@ -1,34 +1,44 @@
+// BrowserRouter, Routes, Route: นำเข้าส่วนควบคุมเส้นทางจาก react-router-dom ใช้สำหรับทำ Client-side routing ในแอพแบบหน้าเดียว (SPA)
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+// FavoritesProvider: นำเข้า Provider Component ทำหน้าที่แชร์สถานะ (State) ของรายการโปรด (Favorites) 
+// ไปยังลูกๆ (Child Components) ทุกตัวที่อยู่ภายใต้มัน ผ่านระบบ Context API
 import { FavoritesProvider } from "./context/FavoritesContext";
-import Navbar from "./components/Navbar";
-import HomePage from "./pages/HomePage";
-import PostDetailPage from "./pages/PostDetailPage";
-import ProfilePage from "./pages/ProfilePage";
-import FavoritesPage from "./pages/FavoritesPage";
-import SearchPage from "./pages/SearchPage"; // เพิ่มหน้าค้นหาข้อมูล
-import NotFoundPage from "./pages/NotFoundPage"; // เพิ่มหน้ากรณีไม่พบ URL ในระบบ
 
+// นำเข้า Component Navbar ซึ่งเป็นส่วนแถบนำทางที่แสดงในทุกหน้า เพื่อให้ผู้ใช้กดเปลี่ยนหน้าได้
+import Navbar from "./components/Navbar";
+
+// นำเข้า Page Components ต่างๆ ที่จะทำหน้าที่เป็นหน้าแต่ละหน้าเมื่อ URL เปลี่ยน
+import HomePage from "./pages/HomePage";             // หน้าแรก (เส้นทาง "/")
+import PostDetailPage from "./pages/PostDetailPage"; // หน้ารายละเอียดโพสต์ (เส้นทาง "/posts/:id")
+import ProfilePage from "./pages/ProfilePage";       // หน้าโปรไฟล์ (เส้นทาง "/profile")
+import FavoritesPage from "./pages/FavoritesPage";   // หน้ารายการโปรด (เส้นทาง "/favorites")
+import SearchPage from "./pages/SearchPage";         // หน้าค้นหา (เส้นทาง "/search")
+import NotFoundPage from "./pages/NotFoundPage";     // หน้าเกิดข้อผิดพลาด 404 เมื่อไม่พบเส้นทาง (เส้นทาง "*")
+
+// App: ฟังก์ชันคอมโพเนนต์หลัก (Root Component)
+// หน้าที่: เป็นตัวแม่ที่รวบรวมทุกๆ หน้าและการตั้งค่าของโปรเจ็กต์เข้าด้วยกัน
+// การเรียกใช้: ถูกเรียกใช้และเรนเดอร์ใน main.jsx
 function App() {
   return (
-    // ครอบ Components ทั้งหมดด้วย Providers เพื่อให้แชร์ State แบบเจาะลึกได้ (ข้อมูล favorites)
+    // <FavoritesProvider>: ครอบแอปพลิเคชันทั้งหมดเพื่อให้ Context สามารถใช้งานได้ในทุก Component ที่อยู่ด้านใน
     <FavoritesProvider>
-      {/* BrowserRouter จำเป็นสำหรับการใช้งาน react-router-dom */}
+      {/* <BrowserRouter>: ตัวควบคุมระบบจัดการเส้นทาง (Routing) หลักของแอป */}
       <BrowserRouter>
-        {/* Navbar แถบเมนู ให้ไปแสดงในทุกๆ หน้าที่เรียกผ่าน routes ย่อย */}
+        {/* <Navbar />: ใส่ไว้ภายนอก <Routes> เพื่อให้อยู่คงที่ทุกหน้า ไม่ว่าทาง URL จะเปลี่ยนเป็นอะไร Navbar จะยังอยู่ */}
         <Navbar />
-        {/* Routes จัดการเรื่องเส้นทาง URL ว่า path ไหนไป component ไหน */}
+        {/* <Routes>: ตู้คอนเทนเนอร์ดูแลการจับคู่ URL pattern (เส้นทาง) ไปยัง Component (หน้า) ทีกำหนด */}
         <Routes>
-          {/* หน้าหลัก */}
+          {/* <Route>: ทำหน้าที่ระบุกฎว่า URL ไหน (path) ให้แสดงคอมโพเนนต์อะไร (element) */}
           <Route path="/" element={<HomePage />} />
-          {/* หน้ารายละเอียดโพสต์ แต่ละโพสต์จะมี ID ไม่เหมือนกัน */}
+          
+          {/* :id เป็นตัวแปรพารามิเตอร์แบบพลวัต (URL Parameter) ที่จะถูกส่งหรือเชื่อมต่อไปยัง PostDetailPage เพื่อดึงข้อมูลเฉพาะเจาะจง */}
           <Route path="/posts/:id" element={<PostDetailPage />} />
-          {/* หน้าโปรไฟล์สมาชิก */}
+          
           <Route path="/profile" element={<ProfilePage />} />
-          {/* หน้ารวมความชื่นชอบ */}
           <Route path="/favorites" element={<FavoritesPage />} />
-          {/* หน้าการค้นหา */}
           <Route path="/search" element={<SearchPage />} />
-          {/* ระบุเส้นทาง * คือ url ใดๆ ที่ไม่ได้กำหนดไว้ก่อนหน้า จะเข้ามาหน้า NotFoundPage (404) */}
+          
+          {/* path="*" คือ Catch-all route คอยจับ URL ทุกอันที่ไม่มีการกำหนดตัวจับคู่เอาไว้ เพื่อแสดงหน้าความผิดพลาดให้กับผู้ใช้ */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
@@ -36,4 +46,5 @@ function App() {
   );
 }
 
+// ส่งออก AppComponent (Default Export) เพื่อให้ main.jsx สามารถ import ไปใช้งานได้
 export default App;

@@ -3,11 +3,21 @@ import { Link } from "react-router-dom";
 import { useFavorites } from "../context/FavoritesContext";
 import CommentList from "./CommentList";
 
+// PostCard: คอมโพเนนต์ทำหน้าที่เป็นโครงสร้าง UI แบบการ์ดเพื่อแสดงเนื้อหา 1 โพสต์
+// เชื่อมต่อไปยัง: PostList, PostDetailPage, SearchPage, FavoritesPage (ถูกเรียกซ้ำๆ ในรายการ)
+// ตัวแปร post (Props): ออบเจ็กต์เก็บข้อมูล 1 โพสต์ที่แม่ทะลุลงมาให้ (ข้างในมีรหัส id, ชื่อโพสต์ title, เนื้อหา body)
 function PostCard({ post }) {
+  // favorites และ toggleFavorite: ตัวแปรสกัดมาจาก Hook useFavorites() 
+  // favorites ไว้ใช้อ้างอิงตรวจสอบ ส่วน toggleFavorite ไว้เรียกใช้งานตอนกดปุ่มหัวใจ 
+  // เชื่อมต่อไปยัง: FavoritesContext เพื่อดึงและเปลี่ยนแปลง State กลางของแอป
   const { favorites, toggleFavorite } = useFavorites();
   
-  // ตรวจสอบว่าโพสต์นี้ถูกใจไว้แล้วหรือยัง โดยการเช็ค id ให้อยู่ใน favorites array
+  // isFavorite: ตัวแปร Boolean ที่คืนค่า true เมื่อรหัสโพสต์ (post.id) นี้มีปรากฏอยูในกระเป๋า favorites
+  // เพื่อเอาไปเช็คแสดงผลไอคอนหัวใจ (❤️ แสดงว่าชอบแล้ว / 🤍 แสดงว่ายังไม่ชอบ)
   const isFavorite = favorites.includes(post.id);
+
+  // showComments: State ตัวแปร Boolean ทำหน้าที่เป็นสวิตช์เปิด-ปิด โซนแสดงความคิดเห็น ว่าตอนนี้แสดงอยู่ (true) หรือไม่ (false)
+  // setShowComments: ฟังก์ชันสำหรับสับสวิตช์ค่าข้างต้น
   const [showComments, setShowComments] = useState(false);
 
   return (
@@ -21,7 +31,7 @@ function PostCard({ post }) {
       }}
     >
       <h3 style={{ margin: "0 0 0.5rem" }}>
-        {/* ใช้ Link ให้คลิกชื่อหัวข้อแล้วไปยังหน้ารายละเอียดโพสต์ (PostDetailPage) */}
+        {/* Link: สร้างลิงก์ครอบชื่อโพสต์ เพื่อให้ผู้ใช้กดเข้าไปอ่านหน้ารายละเอียดแบบเต็มๆ (เชื่อมต่อไป PostDetailPage) */}
         <Link
           to={`/posts/${post.id}`}
           style={{ color: "#1e40af", textDecoration: "none" }}
@@ -34,7 +44,7 @@ function PostCard({ post }) {
       </p>
 
       <div style={{ display: "flex", gap: "0.5rem" }}>
-        {/* ปุ่มจัดการ Favorite กดเพื่อสลับสถานะถูกใจ / ยกเลิก */}
+        {/* ปุ่ม Favorite (รูปหัวใจ) ทำการคล้อง onClick ไว้กับฟังก์ชัน toggleFavorite */}
         <button
           onClick={() => toggleFavorite(post.id)}
           style={{
@@ -42,13 +52,13 @@ function PostCard({ post }) {
             border: "none",
             cursor: "pointer",
             fontSize: "1rem",
-            color: isFavorite ? "#e53e3e" : "#a0aec0", // ถ้าถูกใจให้เปลี่ยนสีแดง
+            color: isFavorite ? "#e53e3e" : "#a0aec0", // สลับสีตามตัวแปร Boolean isFavorite
           }}
         >
           {isFavorite ? "❤️" : "🤍"}
         </button>
 
-        {/* ปุ่มซ่อน/แสดงความคิดเห็น ทำงานควบคู่กับ state showComments */}
+        {/* ปุ่มแสดงความคิดเห็น: เมื่อคลิกจะเรียก setShowComments เพื่อสลับค่า (prev) เป็นค่าตรงข้าม (!prev) */}
         <button
           onClick={() => setShowComments((prev) => !prev)}
           style={{
@@ -61,11 +71,12 @@ function PostCard({ post }) {
             color: "#4a5568",
           }}
         >
+          {/* แสดงคำว่า ซ่อน หรือ ความคิดเห็น ตามสถานะ showComments */}
           {showComments ? "▲ ซ่อน" : "▼ ความคิดเห็น"}
         </button>
       </div>
 
-      {/* เมื่อ showComments เป็นจริง (true) component CommentList จะถูกเรนเดอร์ */}
+      {/* ถ้าเงื่อนไข showComments เป็นจริง ถึงจะเรนเดอร์คอมโพเนนต์ CommentList ออกมาให้เห็น */}
       {showComments && <CommentList postId={post.id} />}
     </div>
   );
