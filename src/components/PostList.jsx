@@ -42,7 +42,7 @@ function PostList() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #1e40af", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
         <h2 style={{ color: "#2d3748", margin: 0 }}>
-          โพสต์ล่าสุด
+          โพสต์ล่าสุด {posts && `(${posts.length})`}
         </h2>
         {/* ปุ่มสำหรับโหลดข้อมูลใหม่ (Challenge 1) */}
         <button 
